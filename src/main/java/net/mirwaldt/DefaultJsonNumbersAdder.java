@@ -1,6 +1,6 @@
 package net.mirwaldt;
 
-public class DefaulJsonNumbersAdder implements JsonNumbersAdder {
+public class DefaultJsonNumbersAdder implements JsonNumbersAdder {
     @Override
     public long sumJsonNumbers(String json) {
         return 0;

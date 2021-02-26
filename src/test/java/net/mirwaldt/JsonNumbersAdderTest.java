@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JsonNumbersAdderTest {
-    private final static JsonNumbersAdder defaultJsonNumbersAdder = new DefaulJsonNumbersAdder();
+    private final static JsonNumbersAdder defaultJsonNumbersAdder = new DefaultJsonNumbersAdder();
 
     private static Stream<Arguments> jsonNumbersAdder() {
         return Stream.of(Arguments.of(defaultJsonNumbersAdder));
