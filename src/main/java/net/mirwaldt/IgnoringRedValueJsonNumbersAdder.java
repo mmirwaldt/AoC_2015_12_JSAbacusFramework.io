@@ -4,8 +4,9 @@ import com.google.gson.*;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-public class IgnoringRedValueJsonNumbersAdder implements JsonNumbersAdder {
+public class IgnoringRedValueJsonNumbersAdder extends AbstractJsonNumbersAdder {
     private final long RED_VALUE_INDICATOR = Long.MAX_VALUE;
 
     @Override
@@ -13,57 +14,39 @@ public class IgnoringRedValueJsonNumbersAdder implements JsonNumbersAdder {
         return sumRecursive(JsonParser.parseString(json));
     }
 
-    private long sumRecursive(JsonElement jsonElement) {
-        if (jsonElement.isJsonNull()) {
+    @Override
+    protected long handleString(String valueAsString) {
+        if("red".equals(valueAsString)) {
+            return RED_VALUE_INDICATOR;
+        } else {
             return 0;
-        } else if (jsonElement instanceof JsonPrimitive) {
-            JsonPrimitive primitive = (JsonPrimitive) jsonElement;
-            if (primitive.isBoolean()) {
-                return 0;
-            } else if(primitive.isString()) {
-                if("red".equals(primitive.getAsString())) {
-                    return RED_VALUE_INDICATOR;
-                } else {
-                    return 0;
-                }
-            } else if (primitive.isNumber()) {
-                String numberAsString = primitive.getAsString();
-                try {
-                    return Long.parseLong(numberAsString);
-                } catch (NumberFormatException e) {
-                    // ignore, we tried it only
-                }
+        }
+    }
+
+    @Override
+    protected long handleArray(Iterator<JsonElement> iterator) {
+        long sum = 0;
+        while (iterator.hasNext()) {
+            long value = sumRecursive(iterator.next());
+            if(value == RED_VALUE_INDICATOR) {
+                value = 0;
+            }
+            sum += value;
+        }
+        return sum;
+    }
+
+    @Override
+    protected long handleObject(Set<Map.Entry<String, JsonElement>> entrySet) {
+        long sum = 0;
+        for (Map.Entry<String, JsonElement> entry : entrySet) {
+            long value = sumRecursive(entry.getValue());
+            if(value == RED_VALUE_INDICATOR) {
                 return 0;
             } else {
-                throw new IllegalArgumentException("Cannot handle jsonPrimitive '"
-                        + primitive + "'!");
-            }
-        } else if (jsonElement instanceof JsonArray) {
-            final JsonArray jsonArray = (JsonArray) jsonElement;
-            final Iterator<JsonElement> iterator = jsonArray.iterator();
-            long sum = 0;
-            while (iterator.hasNext()) {
-                long value = sumRecursive(iterator.next());
-                if(value == RED_VALUE_INDICATOR) {
-                    value = 0;
-                }
                 sum += value;
             }
-            return sum;
-        } else if (jsonElement instanceof JsonObject) {
-            final JsonObject jsonObject = (JsonObject) jsonElement;
-            long sum = 0;
-            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                long value = sumRecursive(entry.getValue());
-                if(value == RED_VALUE_INDICATOR) {
-                    return 0;
-                } else {
-                    sum += value;
-                }
-            }
-            return sum;
-        } else {
-            throw new IllegalArgumentException("Cannot handle jsonElement of type '" + jsonElement.getClass() + "'!");
         }
+        return sum;
     }
 }
