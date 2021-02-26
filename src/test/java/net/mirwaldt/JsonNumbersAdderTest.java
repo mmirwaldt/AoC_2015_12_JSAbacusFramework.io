@@ -9,10 +9,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JsonNumbersAdderTest {
-    private final static JsonNumbersAdder defaultJsonNumbersAdder = new DefaultJsonNumbersAdder();
+    private final static JsonNumbersAdder partOneJsonNumbersAdder = new DefaultJsonNumbersAdder();
+    private final static JsonNumbersAdder partTwoJsonNumbersAdder = new IgnoringRedValueJsonNumbersAdder();
 
     private static Stream<Arguments> jsonNumbersAdder() {
-        return Stream.of(Arguments.of(defaultJsonNumbersAdder));
+        return Stream.of(Arguments.of(partOneJsonNumbersAdder), Arguments.of(partTwoJsonNumbersAdder));
     }
 
     @ParameterizedTest
